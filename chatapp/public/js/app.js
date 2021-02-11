@@ -4485,6 +4485,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _Jetstream_Button_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../Jetstream/Button.vue */ "./resources/js/Jetstream/Button.vue");
+/* harmony import */ var _Jetstream_Input_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../Jetstream/Input.vue */ "./resources/js/Jetstream/Input.vue");
 //
 //
 //
@@ -4492,8 +4494,54 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ['room']
+  components: {
+    Input: _Jetstream_Input_vue__WEBPACK_IMPORTED_MODULE_1__.default,
+    Button: _Jetstream_Button_vue__WEBPACK_IMPORTED_MODULE_0__.default
+  },
+  props: ["room"],
+  data: function data() {
+    return {
+      message: ""
+    };
+  },
+  methods: {
+    sendMessage: function sendMessage() {
+      var _this = this;
+
+      if (this.message == " ") {
+        return;
+      }
+
+      axios.post("/chat/room/" + this.room.id + "/message", {
+        message: this.message
+      }).then(function (response) {
+        if (response.status == 201) {
+          _this.message = "";
+
+          _this.$emit("messagesent");
+        }
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    }
+  }
 });
 
 /***/ }),
@@ -4509,6 +4557,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _messageItem_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./messageItem.vue */ "./resources/js/Pages/Chat/messageItem.vue");
 //
 //
 //
@@ -4516,7 +4565,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({});
+//
+//
+//
+//
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  components: {
+    messageItem: _messageItem_vue__WEBPACK_IMPORTED_MODULE_0__.default
+  },
+  props: ["messages"]
+});
 
 /***/ }),
 
@@ -4536,9 +4595,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  props: ["message"]
+});
 
 /***/ }),
 
@@ -33483,9 +33542,16 @@ var render = function() {
             "div",
             { staticClass: "bg-white overflow-hidden shadow-xl sm:rounded-lg" },
             [
-              _c("message-container"),
+              _c("message-container", { attrs: { messages: _vm.messages } }),
               _vm._v(" "),
-              _c("input-message", { attrs: { room: _vm.currentRoom } })
+              _c("input-message", {
+                attrs: { room: _vm.currentRoom },
+                on: {
+                  messagesent: function($event) {
+                    return _vm.getMessages()
+                  }
+                }
+              })
             ],
             1
           )
@@ -33517,7 +33583,61 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [_vm._v("Input Message")])
+  return _c("div", { staticClass: "relative h-10 m-1" }, [
+    _c(
+      "div",
+      {
+        staticClass: "grid grid-cols-6",
+        staticStyle: { "border-top": "1px solid #e6e6e6" }
+      },
+      [
+        _c("input", {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.message,
+              expression: "message"
+            }
+          ],
+          staticClass: "col-span-5 outline-none p-1",
+          attrs: { type: "text", placeholder: "Enter message..." },
+          domProps: { value: _vm.message },
+          on: {
+            keyup: function($event) {
+              if (
+                !$event.type.indexOf("key") &&
+                _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+              ) {
+                return null
+              }
+              return _vm.sendMessage()
+            },
+            input: function($event) {
+              if ($event.target.composing) {
+                return
+              }
+              _vm.message = $event.target.value
+            }
+          }
+        }),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass:
+              "place-self-end bg-gray-500 hover:bg-blue-700 p-1 mt-1 rounded text-white",
+            on: {
+              click: function($event) {
+                return _vm.sendMessage()
+              }
+            }
+          },
+          [_vm._v("\n      Send\n    ")]
+        )
+      ]
+    )
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -33542,7 +33662,21 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [_vm._v("Message Container")])
+  return _c("div", { staticClass: "h-96 w-full" }, [
+    _c(
+      "div",
+      { staticClass: "h-full p-2 flex flex-col-reverse overflow-scroll" },
+      _vm._l(_vm.messages, function(message, index) {
+        return _c(
+          "div",
+          { key: index },
+          [_c("message-item", { attrs: { message: message } })],
+          1
+        )
+      }),
+      0
+    )
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -33567,7 +33701,9 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [_vm._v("Message Item")])
+  return _c("div", [
+    _vm._v(_vm._s(_vm.message.user.name) + ": " + _vm._s(_vm.message.message))
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
