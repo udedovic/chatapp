@@ -11,6 +11,7 @@
       <button
         @click="sendMessage()"
         class="place-self-end bg-gray-500 hover:bg-blue-700 p-1 mt-1 rounded text-white"
+         style="background-color:darkblue; color:white"
       >
         Send
       </button>
